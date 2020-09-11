@@ -52,13 +52,45 @@ public:
         }
     }
     
+    // Rotate Right/Left based on the transpose + horizontal flip formula
+    void rotateRight(string& board){
+        // Transpose over diagonal
+        for( int i = 0; i < 9; i++ ){
+            for( int j = i; j < 9; j++ ){
+                swap(board[ i*9 + j ],board[ j*9 + i ]);
+            }
+        }
+        //Flip horizontally
+        for( int i = 0; i < 9; i++ ){ // row
+            for( int j = 0; j < 9/2; j++){ // col
+                swap( board[i*9+j], board[ i*9 + (8-j) ] );
+            }
+        }
+    }
+    
+    void rotateLeft(string& board){
+        // Transpose over diagonal
+        for( int i = 0; i < 9; i++ ){
+            for( int j = i; j < 9; j++ ){
+                swap(board[ i*9 + j ],board[ j*9 + i ]);
+            }
+        }
+        //Flip vertically
+        for( int i = 0; i < 9/2; i++ ){ // row
+            for( int j = 0; j < 9; j++){ // col
+                swap( board[i*9+j], board[ (8-i)*9 + j]);
+            }
+        }
+    }
+    
     
     BoardCreator(int numBoards){
         string seedBoard = "152489376739256841468371295387124659591763428246895713914637582625948137873512964";
-        
+        boardList.push_back( Board(seedBoard) );
         for( int i = 0; i < numBoards; i++){
+            
             for( int j = 0; j < 100; j++ ){
-                int op = rand() % 4;
+                int op = rand() % 6;
                
                 int rowOrCol2 = rand() % 3;
                 int rowOrCol3 = rand() % 3;
@@ -72,8 +104,12 @@ public:
                     swapCols(seedBoard, rowOrCol2*3 + rowOrCol3, rowOrCol2*3+rowOrCol4);
                 }else if( op == 2 ){
                     moveLeft(seedBoard);
-                }else{
+                }else if( op == 3 ){
                     moveRight(seedBoard);
+                }else if( op == 4 ){
+                    rotateLeft(seedBoard);
+                }else{
+                    rotateRight(seedBoard);
                 }
             }
             boardList.push_back( Board(seedBoard) );
