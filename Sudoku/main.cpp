@@ -7,9 +7,22 @@
 //
 
 #include <iostream>
+#include "BoardCreator.cpp"
 
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
+    
+    // Creates BoadCreator with BoardList from file
+    // BoardCreator bc = BoardCreator("sampleBoards.txt");
+    
+    BoardCreator bc = BoardCreator("sampleBoards.txt");
+    
+    for( int i = 0; i < bc.boardList.size(); i++){
+        if( bc.boardList[i].noRepeats() == false ){
+            cout << "Board: " << i << " has repeats" << endl;
+        }else{
+            cout << "Board: " << i << " is good!" << endl;
+        }
+    }
+    
     return 0;
 }
