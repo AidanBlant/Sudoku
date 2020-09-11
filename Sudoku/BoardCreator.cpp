@@ -10,7 +10,6 @@
 #include "Board.cpp"
 #include <vector>
 
-
 #include <unistd.h>
 #define GetCurrentDir getcwd
 
@@ -36,6 +35,52 @@ public:
             board[i*9+b] = tempA;
         }
     }
+    
+    void moveRight(string& board){
+        for( int i = 0; i < 9; i++ ){
+            string firstSix = board.substr(i*9,6);
+            board.replace((i*9),3,board.substr(i*9+6,3));
+            board.replace(i*9+3,6,firstSix);
+        }
+    }
+    void moveLeft(string& board){
+        // Go row by row moving all tiles 3 to the left
+        for( int i = 0; i < 9; i++ ){
+            string firstThree = board.substr(i*9,3);
+            board.replace((i*9),6,board.substr(i*9+3,6));
+            board.replace((i*9+6),3,firstThree);
+        }
+    }
+    
+    
+    BoardCreator(int numBoards){
+        string seedBoard = "152489376739256841468371295387124659591763428246895713914637582625948137873512964";
+        
+        for( int i = 0; i < numBoards; i++){
+            for( int j = 0; j < 100; j++ ){
+                int op = rand() % 4;
+               
+                int rowOrCol2 = rand() % 3;
+                int rowOrCol3 = rand() % 3;
+                int rowOrCol4 = rand() % 3;
+                
+                // pick board row or col 0-3
+                // swap two rows or columns in it
+                if( op == 0 ){
+                    swapRows(seedBoard, rowOrCol2*3 + rowOrCol3, rowOrCol2*3+rowOrCol4);
+                }else if( op == 1 ){
+                    swapCols(seedBoard, rowOrCol2*3 + rowOrCol3, rowOrCol2*3+rowOrCol4);
+                }else if( op == 2 ){
+                    moveLeft(seedBoard);
+                }else{
+                    moveRight(seedBoard);
+                }
+            }
+            boardList.push_back( Board(seedBoard) );
+        }
+
+    }
+    
     
     // Initialize from file of completeBoards
     BoardCreator(string inputFile){

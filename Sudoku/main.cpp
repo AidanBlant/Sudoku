@@ -14,9 +14,11 @@ int main(int argc, const char * argv[]) {
     // Creates BoadCreator with BoardList from file
     // BoardCreator bc = BoardCreator("sampleBoards.txt");
     
-    BoardCreator bc = BoardCreator("sampleBoards.txt");
+//    BoardCreator bc = BoardCreator("sampleBoards.txt");
+    BoardCreator bc = BoardCreator(10);
     
     for( int i = 0; i < bc.boardList.size(); i++){
+        bc.boardList[i].print();
         if( bc.boardList[i].noRepeats() == false ){
             cout << "Board: " << i << " has repeats" << endl;
         }else{
