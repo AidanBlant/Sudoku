@@ -15,8 +15,30 @@
 
 class BoardCreator{
 public:
-    vector<Board> boardList;
+    vector<string> boardList;
+
+    BoardCreator(int numBoards){
+        while( boardList.size() <numBoards ){
+            addBoard(makeBoard());
+        }
+    }
+
+    // Initialize from file of completeBoards
+    BoardCreator(string inputFile){
+        string line;
+        ifstream myfile (inputFile);
+        if (myfile.is_open()){
+          while ( getline (myfile,line) ){
+              // Make board with the line, then add it to boardList
+              boardList.push_back( line );
+          }
+          myfile.close();
+        }
+        else cout << "Unable to open file\n";
+    }
     
+private:
+    // MARK: - Board Transformation Operations
     // Swap two rows in a board string rows 0-8
     void swapRows(string& board, int a, int b){
         // so any given row will start on a/b * 9, and go for 9 characters
@@ -83,125 +105,77 @@ public:
         }
     }
     
-    
-    BoardCreator(int numBoards){
-        string seedBoard = "152489376739256841468371295387124659591763428246895713914637582625948137873512964";
-        boardList.push_back( Board(seedBoard) );
-        for( int i = 0; i < numBoards; i++){
-            
-            for( int j = 0; j < 100; j++ ){
-                int op = rand() % 6;
-               
-                int rowOrCol2 = rand() % 3;
-                int rowOrCol3 = rand() % 3;
-                int rowOrCol4 = rand() % 3;
-                
-                // pick board row or col 0-3
-                // swap two rows or columns in it
-                if( op == 0 ){
-                    swapRows(seedBoard, rowOrCol2*3 + rowOrCol3, rowOrCol2*3+rowOrCol4);
-                }else if( op == 1 ){
-                    swapCols(seedBoard, rowOrCol2*3 + rowOrCol3, rowOrCol2*3+rowOrCol4);
-                }else if( op == 2 ){
-                    moveLeft(seedBoard);
-                }else if( op == 3 ){
-                    moveRight(seedBoard);
-                }else if( op == 4 ){
-                    rotateLeft(seedBoard);
-                }else{
-                    rotateRight(seedBoard);
-                }
-            }
-            boardList.push_back( Board(seedBoard) );
-        }
-
-    }
-    
-    
-    // Initialize from file of completeBoards
-    BoardCreator(string inputFile){
-        string line;
-        ifstream myfile (inputFile);
-        if (myfile.is_open()){
-          while ( getline (myfile,line) ){
-              // Make board with the line, then add it to boardList
-              boardList.push_back( Board(line) );
-          }
-          myfile.close();
-        }
-        else cout << "Unable to open file\n";
-    }
-
-    
-    // A very poor brute-force sudoku creating algorithm
-    string createFilledBoard(){
-        bool fill[3][9][9] = {false};
-        bool beenTried[81][9] = {false};
-        int board[81] = {0};
-
-        createFilled(board, fill, beenTried, 0);
-
-        string boardString = "";
-        // Parse int array in to string
-        for( int i = 0; i < 81; i++ ){
-            boardString += (char)(board[i]-'0');
-        }
-        
-        return boardString;
-    }
-    
-    bool createFilled(int board[], bool fill[3][9][9], bool beenTried[81][9], int inc){
-        printIntArray(board);
-//        printFill(fill);
-//        int inc = incrementer;
-        int row = inc/9;
-        int col = inc%9;
-        int box = inc/27 + (inc%9)/3;
-        
+    void rotate180(string& board){
+        // Transpose over diagonal
         for( int i = 0; i < 9; i++ ){
-            
-            if( inc > 20 and beenTried[inc][i] ){
+            for( int j = i; j < 9; j++ ){
+                swap(board[ i*9 + j ],board[ j*9 + i ]);
             }
-
-            // If value can be added validly, add it and move onto next position
-            if( !fill[0][row][i] and !fill[1][col][i] and !fill[2][box][i] ){
-                // If is valid and incrementer is 81, we are done return
-                if( inc == 81 ){
-                    cout << "Board Done!" << endl;
-                    return true;
-                }else{
-
-                    // Set flags and recursive call
-                    fill[0][row][i] = true;
-                    fill[1][col][i] = true;
-                    fill[2][box][i] = true;
-                    
-                    // Make recursive call, if true, we're done, just return true all the way back
-                    board[inc] = (i+1);
-                    beenTried[inc][i] = true;
-                    if( createFilled(board, fill, beenTried, inc+1) ){
-                        cout << "filled board created!" << endl;
-                        return true;
-                    }else{
-                        // If not true, undo flags, and move onto next value to try
-                        // TODO: Issue is here stilllllll, not getting undone correctly
-//                        cout << "i: " << i << "  incrementer: " << incrementer << endl;
-                        board[inc] = 0;
-                        fill[0][row][i] = false;
-                        fill[1][col][i] = false;
-                        fill[2][box][i] = false;
-                    }
-                }
-            } else{
-//                cout << i+1 << " invalid at " << inc << endl;
-            }
-            // Else, not valid and simply continue
         }
         
-        // No valid values
+        // Transpose over opposite diagonal
+        for( int i = 0; i < 9; i++){
+            for( int j = 0; j < (9-i); j++){
+                swap(board[ i*9 + j ],board[ (8-i) + ((8-j)*9) ]);
+            }
+        }
+        
+    }
+    
+    // Return a board created from transformations on seedboard
+    string makeBoard(){
+        string seedBoard = "123456789456789123789123456234567891567891234891234567345678912678912345912345678";
+        for( int j = 0; j < 1000; j++ ){
+            int op = rand() % 26;
+           
+            // TODO: These are preset based on following scheme
+            // 0 = rows01, 1=row12, 2=swap02 | 3=rows34, 4=rows45, 5=rows35
+            // 9 = col01, 10=col12, etc...
+            // To maintain repeatability from seedString
+            int rowOrCol2 = rand() % 3;
+            int rowOrCol3 = rand() % 3;
+            int rowOrCol4 = rand() % 3;
+            
+            // pick board row or col 0-3
+            // swap two rows or columns in it
+            if( op < 9){
+                swapRows(seedBoard, rowOrCol2*3 + rowOrCol3, rowOrCol2*3+rowOrCol4);
+            }else if( op < 18 ){
+                swapCols(seedBoard, rowOrCol2*3 + rowOrCol3, rowOrCol2*3+rowOrCol4);
+            }else if( op < 19 ){
+                moveLeft(seedBoard);
+            }else if( op < 20 ){
+                moveRight(seedBoard);
+            }else if( op < 21 ){
+                rotateLeft(seedBoard);
+            }else if(op < 22 ){
+                rotateRight(seedBoard);
+            }else{
+                rotate180(seedBoard);
+            }
+        }
+        return seedBoard;
+    }
+    
+    // Add board if not a duplicate
+    void addBoard(string newBoard){
+        if( !existsInBoardList(newBoard) ){
+            boardList.push_back(newBoard);
+            return;
+        }
+        return;
+    }
+    
+    bool existsInBoardList(string toCheck){
+        if (std::find(boardList.begin(), boardList.end(), toCheck) != boardList.end())
+        {
+            cout << "Already exists in board" << std::endl;
+            return true;
+        }
         return false;
     }
-    
+
+public:
     /* Display ß*/
     void printIntArray(int board[81]){
         for( int i = 0; i < 81; i++ ){
@@ -233,6 +207,20 @@ public:
         cout << "___________________________________" << endl;
     }
     
+    // I/O
+    int exportFilledBoardList(string fileName){
+        if( boardList.size() == 0 ){
+            cout << "No Boards in BoardList to export" << endl;
+            return 1; // Error, No Boards in BoardList to Export
+        }
+        
+        ofstream myfile;
+        myfile.open (fileName+".txt");
+        for( int i = 0; i < boardList.size(); i++ ){
+            myfile << boardList[i] << "\n";
+        }
+        myfile.close();
+        return 0;
+    }
+    
 };
-
-

@@ -13,8 +13,7 @@ using namespace std;
 
 class Board {
 public:
-    	int board[9][9];
-    int setTiles;
+    int board[9][9];
     	
     // Creates empty board with 0's 
     Board(){
@@ -23,7 +22,6 @@ public:
                 board[i][j] = 0;
             }
         }
-        setTiles = 0;
     }
     
     // Load board from 81 character string
@@ -72,10 +70,54 @@ public:
                     }else{
                         box[boxRow*3 + boxCol][ board[i][j] - 1] = true;
                     }
-                    
                 }
             }
         }
+        
+        return true;
+    }
+    
+    static bool noRepeats(string grid){
+        bool col[9][9] = {false};
+        bool box[9][9] = {false};
+        
+        Board * tempBoard = new Board(grid);
+        
+        for( int i = 0; i < 9; i++ ){
+            bool row[9] = {false};
+            for( int j = 0; j < 9; j++ ){
+                if( tempBoard->board[i][j] != 0 ){
+                    
+                    // If repeat on row, false, otherwise add to row bool array
+                    if( row[ tempBoard->board[i][j] -1 ] == true ){
+                        cout << "Row repetition of " << tempBoard->board[i][j] << " at (" << i << "," << j << ")" << endl;
+                        return false; // False based on row repeat
+                    }else{
+                        row[ tempBoard->board[i][j] -1] = true;
+                    }
+                    
+                    // If repeat on column, false, otherwise add to column bool array
+                    if( col[i][ tempBoard->board[i][j] -1] == true ){
+                        cout << "Col repetition of " << tempBoard->board[i][j] << " at (" << i << "," << j << ")" << endl;
+                        return false; // False based on column repeat
+                    }else{
+                        col[i][ tempBoard->board[i][j] -1] = true;
+                    }
+                    
+                    // If repeat on box, false, otherwise add to box bool array
+                    int boxRow = i/3;
+                    int boxCol = j/3;
+                    if( box[boxRow*3 + boxCol ][ tempBoard->board[i][j] - 1 ] == true ){
+                        cout << "Box repetition of " << tempBoard->board[i][j] << " at (" << i << "," << j << ")" << endl;
+                        return false; // False based on box repeat
+                    }else{
+                        box[boxRow*3 + boxCol][ tempBoard->board[i][j] - 1] = true;
+                    }
+                }
+            }
+        }
+        
+        delete tempBoard;
         
         return true;
     }
@@ -86,7 +128,7 @@ public:
     }
     
     // Display Board in Console
-    void print(){
+    void printGrid(){
         cout << endl;
         cout <<  "-------------" << endl;
         for(int i=0; i<9; i++){
@@ -108,5 +150,20 @@ public:
         }
         cout << endl;
     }
+    
+    static void printGrid(string board){
+        
+    }
+    
+    string getString(){
+        string result = "";
+        for( int i = 0; i < 9; i++){
+            for( int j = 0; j < 9; j++){
+                result+= to_string( board[i][j] );
+            }
+        }
+        return result;
+    }
+    
     
 };
